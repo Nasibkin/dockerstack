@@ -1,0 +1,31 @@
+version: '3'
+services:
+  web:
+    image: mcr.microsoft.com/dotnet/aspnet:6.0
+    ports:
+      - "80:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    networks:
+      - mynetwork
+
+  app:
+    image: mcr.microsoft.com/dotnet/sdk:6.0
+    command: bash -c "dotnet build && dotnet run"
+    volumes:
+      - ./app:/app
+    networks:
+      - mynetwork
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: examplepassword
+    ports:
+      - "5432:5432"  
+
+networks:
+  mynetwork:
+
+volumes:
+  pg_data:

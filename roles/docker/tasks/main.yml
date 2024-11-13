@@ -1,0 +1,42 @@
+---
+- name: Install Docker dependencies on Amazon Linux 2
+  yum:
+    name:
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+    state: present
+  when: ansible_facts['distribution'] == 'Amazon' and ansible_facts['distribution_version'] == '2'
+
+- name: Install Docker on Amazon Linux 2023+
+  dnf:
+    name: docker
+    state: present
+  when: ansible_facts['distribution'] == 'Amazon' and ansible_facts['distribution_version'] == '2023'
+
+- name: Start Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Install Docker Compose
+  get_url:
+    url: "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64"
+    dest: /usr/local/bin/docker-compose
+    mode: 'u+x'
+
+- name: Create directory for Docker Compose files
+  file:
+    path: /home/{{ ansible_user }}/docker
+    state: directory
+
+- name: Copy docker-compose.yml to remote host
+  copy:
+    src: /Users/nasiba/Desktop/DEVOPS_JOB/November/Kevin/task1/ansible-docker-stack/roles/docker/files/docker-compose.yml
+    dest: /home/{{ ansible_user }}/docker/docker-compose.yml
+
+- name: Deploy Docker stack
+  shell: docker-compose -f /home/{{ ansible_user }}/docker/docker-compose.yml up -d
+  args:
+    chdir: /home/{{ ansible_user }}/docker
